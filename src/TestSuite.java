@@ -21,7 +21,6 @@ public class TestSuite {
 		testMultiThread2();
 	}
 
-
 	public void testAvailableFiles() {
 		FileServer fs = newFileServer();
 
@@ -31,21 +30,21 @@ public class TestSuite {
 		// Step
 		it("One available file. Successful creation");
 		fs.create("a", "hello");
-		assertEquals(fs.availableFiles().toArray(new String[0]), new String[] {"a"});
+		assertEquals(fs.availableFiles().toArray(new String[0]), new String[] { "a" });
 		it("Initially closed file");
 		assertEquals(fs.fileStatus("a"), Mode.CLOSED);
 
 		// Step step
 		it("Two available files");
 		fs.create("b", "hello2");
-		assertEquals(fs.availableFiles().toArray(new String[0]), new String[] {"a", "b"});
+		assertEquals(fs.availableFiles().toArray(new String[0]), new String[] { "a", "b" });
 
 		it("Unknown file status");
 		assertEquals(fs.fileStatus("c"), Mode.UNKNOWN);
 
 		it("Opening a file (read) keeps the same available files");
 		Optional<File> of = fs.open("a", Mode.READABLE);
-		assertEquals(fs.availableFiles().toArray(new String[0]), new String[] {"a", "b"});
+		assertEquals(fs.availableFiles().toArray(new String[0]), new String[] { "a", "b" });
 
 		fs.close(of.get());
 		it("File still avilable after closing");
@@ -53,7 +52,7 @@ public class TestSuite {
 
 		it("Opening a file (write) keeps the same available files");
 		fs.open("a", Mode.READWRITEABLE);
-		assertEquals(fs.availableFiles().toArray(new String[0]), new String[] {"a", "b"});
+		assertEquals(fs.availableFiles().toArray(new String[0]), new String[] { "a", "b" });
 	}
 
 	public void testSingleThread() {
@@ -106,7 +105,6 @@ public class TestSuite {
 
 		}
 
-
 		it("Write mode test -- non interference with other files");
 		Optional<File> ofb = fs.open("b", Mode.READWRITEABLE);
 		assertEquals(ofb.get().read(), "world");
@@ -148,13 +146,11 @@ public class TestSuite {
 
 	public void testMultiThreadRead() {
 		/*
-		   Create server with 'a and 'b'
-
-		    Open 'a' for R . Close
-		 | Open 'a' for R . Close
-		 | Open 'b' for R
-
-		   Check that there is no blocking
+		 * Create server with 'a and 'b'
+		 * 
+		 * Open 'a' for R . Close | Open 'a' for R . Close | Open 'b' for R
+		 * 
+		 * Check that there is no blocking
 		 */
 
 		FileServer fs = newFileServer();
@@ -164,16 +160,16 @@ public class TestSuite {
 		Thread t1 = new Thread(new Runnable() {
 			@Override
 			public void run() {
-			        it("Multi threads can read consistent state (thread 1)");
-			        try {
-			                Optional<File> ofa1 = fs.open("a", Mode.READABLE);
-			                File fa1 = ofa1.get();
+				it("Multi threads can read consistent state (thread 1)");
+				try {
+					Optional<File> ofa1 = fs.open("a", Mode.READABLE);
+					File fa1 = ofa1.get();
 
-			                assertEquals(fa1.read(), "coheed");
-			                fs.close(fa1);
+					assertEquals(fa1.read(), "coheed");
+					fs.close(fa1);
 				} catch (Exception e) {
-			                failure("");
-			                e.printStackTrace();
+					failure("");
+					e.printStackTrace();
 
 				}
 			}
@@ -181,16 +177,16 @@ public class TestSuite {
 		Thread t2 = new Thread(new Runnable() {
 			@Override
 			public void run() {
-			        it("Multi threads can read consistent state (thread 2)");
-			        try {
-			                Optional<File> ofa2 = fs.open("a", Mode.READABLE);
-			                File fa2 = ofa2.get();
+				it("Multi threads can read consistent state (thread 2)");
+				try {
+					Optional<File> ofa2 = fs.open("a", Mode.READABLE);
+					File fa2 = ofa2.get();
 
-			                assertEquals(fa2.read(), "coheed");
-			                fs.close(fa2);
+					assertEquals(fa2.read(), "coheed");
+					fs.close(fa2);
 				} catch (Exception e) {
-			                failure("");
-			                e.printStackTrace();
+					failure("");
+					e.printStackTrace();
 
 				}
 			}
@@ -198,14 +194,14 @@ public class TestSuite {
 		Thread t3 = new Thread(new Runnable() {
 			@Override
 			public void run() {
-			        it("Multi threads can read (different file state) (thread 3)");
-			        try {
-			                Optional<File> ofa3 = fs.open("b", Mode.READABLE);
-			                File fa3 = ofa3.get();
-			                assertEquals(fa3.read(), "cambria");
+				it("Multi threads can read (different file state) (thread 3)");
+				try {
+					Optional<File> ofa3 = fs.open("b", Mode.READABLE);
+					File fa3 = ofa3.get();
+					assertEquals(fa3.read(), "cambria");
 				} catch (Exception e) {
-			                failure("");
-			                e.printStackTrace();
+					failure("");
+					e.printStackTrace();
 
 				}
 			}
@@ -217,7 +213,9 @@ public class TestSuite {
 			t1.join(300);
 			t2.join(300);
 			t3.join(300);
-		} catch (InterruptedException e) { assertEquals(false, true); }
+		} catch (InterruptedException e) {
+			assertEquals(false, true);
+		}
 		it("Multiple read is allowed with no blocking (thread 1)");
 		assertEquals(t1.getState(), Thread.State.TERMINATED);
 
@@ -233,72 +231,77 @@ public class TestSuite {
 		fs.create("a", "coheed");
 		fs.create("b", "cambria");
 
-
 		// -----------------------------------------------------------------------------
 		// Scenario 1:
-		//   Thread main: opens A for reading
-		//   Thread wt1: open A for writing
-		//             - GETS BLOCKED
-		//   Thread main: closes A
-		//   Thread wt1: -- GETS UNBLOCKED
-		//                closes A
+		// Thread main: opens A for reading
+		// Thread wt1: open A for writing
+		// - GETS BLOCKED
+		// Thread main: closes A
+		// Thread wt1: -- GETS UNBLOCKED
+		// closes A
 
 		Thread main = new Thread(new Runnable() {
 			@Override
 			public void run() {
 
-			        Optional<File> ofA = fs.open("a", Mode.READABLE);
+				Optional<File> ofA = fs.open("a", Mode.READABLE);
 
-			        Signal signal = new Signal();
-			        signal.flag = false;
+				Signal signal = new Signal();
+				signal.flag = false;
 
-			        // Start off another thread which gets blocked
-			        Thread wt1 = new Thread(new Runnable() {
+				// Start off another thread which gets blocked
+				Thread wt1 = new Thread(new Runnable() {
 
 					@Override
 					public void run() {
-					        try {
-					                Optional<File> ofaw1 = fs.open("a", Mode.READWRITEABLE);
-					                File faw1 = ofaw1.get();
-					                it("Process trying to open in write mode has been eventually unblocked (unblocked signal should be true)");
-					                assertEquals(signal.flag, true);
-					                fs.close(faw1);
+						try {
+							Optional<File> ofaw1 = fs.open("a", Mode.READWRITEABLE);
+							File faw1 = ofaw1.get();
+							it("Process trying to open in write mode has been eventually unblocked (unblocked signal should be true)");
+							assertEquals(signal.flag, true);
+							fs.close(faw1);
 						} catch (Exception e) {
-					                // In case an exception happens
-					                it("Process trying to open in write mode has been eventually unblocked (unblocked signal should be true)");
-					                failure("");
-					                e.printStackTrace();
+							// In case an exception happens
+							it("Process trying to open in write mode has been eventually unblocked (unblocked signal should be true)");
+							failure("");
+							e.printStackTrace();
 
 						}
 					}
 
 				});
-			        wt1.start();
-			        try {
-			                wt1.join(500);
-				} catch (InterruptedException e) { failure("Interrupt"); }
-			        // Detect that the thread is blocked
-			        it("File open for reading; another process trying to open it for writing is blocked");
-			        assertEquals(wt1.getState(), Thread.State.WAITING);
+				wt1.start();
+				try {
+					wt1.join(500);
+				} catch (InterruptedException e) {
+					failure("Interrupt");
+				}
+				// Detect that the thread is blocked
+				it("File open for reading; another process trying to open it for writing is blocked");
+				assertEquals(wt1.getState(), Thread.State.WAITING);
 
-			        // Set observable checkpoint in other thread
-			        signal.flag = true;
-			        // Triggers unblock of wt1
-			        fs.close(ofA.get());
+				// Set observable checkpoint in other thread
+				signal.flag = true;
+				// Triggers unblock of wt1
+				fs.close(ofA.get());
 
-			        try {
-			                wt1.join(500);
-				} catch (InterruptedException e) { failure("Interrupt"); }
+				try {
+					wt1.join(500);
+				} catch (InterruptedException e) {
+					failure("Interrupt");
+				}
 
-			        it("Successfuly unblocked writing process");
-			        assertEquals(wt1.getState(), Thread.State.TERMINATED);
+				it("Successfuly unblocked writing process");
+				assertEquals(wt1.getState(), Thread.State.TERMINATED);
 			}
 		});
 		main.start();
 
 		try {
 			main.join(1000);
-		} catch (InterruptedException e) { failure("Interrupt"); }
+		} catch (InterruptedException e) {
+			failure("Interrupt");
+		}
 
 		it("Successfuly closed files after blocking interaction");
 		assertEquals(main.getState(), Thread.State.TERMINATED);
@@ -310,28 +313,15 @@ public class TestSuite {
 		fs.create("a", "coheed");
 		fs.create("b", "cambria");
 
-    /* Situation
-       Main: Open b for Read
-       sub1:  Open a for Write
-            -- check success
-             (WAIT on SEMAPHORE)
-       sub2: Open a for Read
-         -- check it gets block
-         * kill this thread
-       Main: Open b for Read (not blocked)
-             Read b . Close b
-       sub3: Open a for write
-               -- check it gets blocked
-       Main: signal sub1 to procedd
-       sub1:  write "claudio" to a
-              close a
-       sub3 should get unblocked
-              -- check unblocked
-              -- get the file and read it 'claudio'
-              -- write 'ambelina'
-              -- close a
-       -- check sub3 is not blocked and termintes
-    */
+		/*
+		 * Situation Main: Open b for Read sub1: Open a for Write -- check success (WAIT
+		 * on SEMAPHORE) sub2: Open a for Read -- check it gets block kill this thread
+		 * Main: Open b for Read (not blocked) Read b . Close b sub3: Open a for write
+		 * -- check it gets blocked Main: signal sub1 to procedd sub1: write "claudio"
+		 * to a close a sub3 should get unblocked -- check unblocked -- get the file and
+		 * read it 'claudio' -- write 'ambelina' -- close a -- check sub3 is not blocked
+		 * and termintes
+		 */
 		// Open b
 		Optional<File> ofb = fs.open("b", Mode.READABLE);
 
@@ -342,7 +332,6 @@ public class TestSuite {
 			Thread.currentThread().interrupt();
 		}
 
-
 		Signal doneOpen = new Signal();
 		Signal signal = new Signal();
 
@@ -350,25 +339,24 @@ public class TestSuite {
 
 			@Override
 			public void run() {
-			        try {
-			                Optional<File> ofa1 = fs.open("a", Mode.READWRITEABLE);
-			                File fa1 = ofa1.get();
-			                it("Process with write mode of file succeeds in reading while blocking others");
-			                assertEquals(fa1.read(), "coheed");
-			                doneOpen.flag = true;
+				try {
+					Optional<File> ofa1 = fs.open("a", Mode.READWRITEABLE);
+					File fa1 = ofa1.get();
+					it("Process with write mode of file succeeds in reading while blocking others");
+					assertEquals(fa1.read(), "coheed");
+					doneOpen.flag = true;
 
-			                // Wait
-			                signaller.acquire();
-			                fa1.write("claudio");
-			                // Set observable checkpoint in other thread
-			                signal.flag = true;
-			                // Triggers unblock
-			                fs.close(fa1);
-
+					// Wait
+					signaller.acquire();
+					fa1.write("claudio");
+					// Set observable checkpoint in other thread
+					signal.flag = true;
+					// Triggers unblock
+					fs.close(fa1);
 
 				} catch (Exception e) {
-			                failure("");
-			                e.printStackTrace();
+					failure("");
+					e.printStackTrace();
 				}
 			}
 		});
@@ -377,27 +365,30 @@ public class TestSuite {
 		// Wait and check that it succesfully opened
 		try {
 			sub1.join(500);
-		} catch (InterruptedException e) { failure("Interrupt"); }
+		} catch (InterruptedException e) {
+			failure("Interrupt");
+		}
 		it("Another process trying to read whilst another writes gets blocked. Successful open and read.");
 		assertEquals(doneOpen.flag, true);
-
 
 		// Start off another thread which gets blocked
 		Thread sub2 = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-			        Optional<File> ofaa = fs.open("a", Mode.READABLE);
-			        File faa = ofaa.get();
-			        // Eventually close
-			        fs.close(faa);
+				Optional<File> ofaa = fs.open("a", Mode.READABLE);
+				File faa = ofaa.get();
+				// Eventually close
+				fs.close(faa);
 			}
 
 		});
 		sub2.start();
 		try {
 			sub2.join(500);
-		} catch (InterruptedException e) { failure("Interrupt"); }
+		} catch (InterruptedException e) {
+			failure("Interrupt");
+		}
 
 		// Detect that the thread is blocked
 		assertEquals(sub2.getState(), Thread.State.WAITING);
@@ -415,29 +406,29 @@ public class TestSuite {
 			@Override
 			public void run() {
 
-			        try {
-			                Optional<File> ofa2 = fs.open("a", Mode.READWRITEABLE);
-			                // I'm unblocked!
-			                it("Second write attempt gets unblocked");
-			                assertEquals(signal.flag, true);
+				try {
+					Optional<File> ofa2 = fs.open("a", Mode.READWRITEABLE);
+					// I'm unblocked!
+					it("Second write attempt gets unblocked");
+					assertEquals(signal.flag, true);
 
-			                // Signalled to go (the signal will come after the
-			                // other thread has closed)
-			                File fa2 = ofa2.get();
+					// Signalled to go (the signal will come after the
+					// other thread has closed)
+					File fa2 = ofa2.get();
 
-			                it("Unlocked process sees write from previous locking write process");
-			                try {
-			                        assertEquals(fa2.read(), "claudio");
-			                        fa2.write("ambelina");
-			                        fs.close(fa2);
+					it("Unlocked process sees write from previous locking write process");
+					try {
+						assertEquals(fa2.read(), "claudio");
+						fa2.write("ambelina");
+						fs.close(fa2);
 					} catch (Exception e) {
-			                        failure("");
-			                        e.printStackTrace();
+						failure("ambelina failed");
+						e.printStackTrace();
 
 					}
 				} catch (Exception e) {
-			                failure("");
-			                e.printStackTrace();
+					failure("");
+					e.printStackTrace();
 
 				}
 
@@ -447,7 +438,9 @@ public class TestSuite {
 		// Let a bit of time elapse to allow the thread to get blocked
 		try {
 			sub3.join(500);
-		} catch (InterruptedException e) { failure("Interrupt"); }
+		} catch (InterruptedException e) {
+			failure("Interrupt");
+		}
 		// Detect block
 		it("Another process trying to write whilst another writes gets blocked");
 		assertEquals(sub3.getState(), Thread.State.WAITING);
@@ -458,14 +451,18 @@ public class TestSuite {
 		// Let a bit of time elapse to allow the thread to get unblocked
 		try {
 			sub3.join(500);
-		} catch (InterruptedException e) { failure("Interrupt");  }
+		} catch (InterruptedException e) {
+			failure("Interrupt");
+		}
 		// Detect block
 		it("Second write attempt was indeed unblocked");
 		assertEquals(sub3.getState(), Thread.State.TERMINATED);
 
 		try {
 			sub2.join(500);
-		} catch (InterruptedException e) { failure("Interrupt"); }
+		} catch (InterruptedException e) {
+			failure("Interrupt");
+		}
 
 		// Detect that the thread 2 was unblocked eventually
 		it("Blocked reader thread was eventually unblocked");
@@ -485,7 +482,6 @@ public class TestSuite {
 
 	// ************ TEST HARNESS *************************************************
 
-
 	public String className;
 
 	public static final String ANSI_RED = "\u001B[31m\033[1m";
@@ -500,7 +496,7 @@ public class TestSuite {
 
 	public static void main(String[] args) {
 
-    System.out.println("CO661 - Assessment 1 - Test Suite v1.2.2");
+		System.out.println("CO661 - Assessment 1 - Test Suite v1.2.2");
 		// First string provides that name of your FileServer class
 		if (args.length < 1) {
 			System.out.println("Please pass the name of your FileServer class as an argument");
@@ -525,7 +521,7 @@ public class TestSuite {
 
 		try {
 			Class loadedMyClass = classLoader.loadClass(className);
-			//System.out.println("Loaded class name: " + loadedMyClass.getName());
+			// System.out.println("Loaded class name: " + loadedMyClass.getName());
 
 			// Create a new instance from the loaded class
 			Constructor constructor = loadedMyClass.getConstructor();
@@ -557,14 +553,13 @@ public class TestSuite {
 		System.out.println("Running tests.");
 		tests();
 		System.out.println("\n" + ANSI_BLUE + "Tests: " + testCount + ANSI_RESET);
-		System.out.println(ANSI_GREEN + "Passed: " + passedTests +  ANSI_RESET);
+		System.out.println(ANSI_GREEN + "Passed: " + passedTests + ANSI_RESET);
 		if (passedTests == testCount) {
 			System.out.println("\nOk.");
 		} else {
 			System.out.println(ANSI_RED + "Failed: " + (testCount - passedTests) + ANSI_RESET);
 		}
 	}
-
 
 	public void describe(String msg) {
 		System.out.println("\n" + msg);
@@ -592,7 +587,7 @@ public class TestSuite {
 
 	// Assertion boilerplate
 	public synchronized void assertEquals(String s1, String s2) {
-  	        if (s1.equals(s2)) {
+		if (s1.equals(s2)) {
 			success();
 		} else {
 			failure("Expected " + s2 + " got " + s1);
@@ -604,7 +599,7 @@ public class TestSuite {
 	public synchronized void assertEquals(String[] s1, String[] s2) {
 		boolean eq = (s1.length == s2.length);
 		for (int i = 0; i < s1.length; i++) {
-		    eq = eq & (s1[i].equals(s2[i]));
+			eq = eq & (s1[i].equals(s2[i]));
 		}
 		if (eq) {
 			success();
