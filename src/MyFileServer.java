@@ -6,10 +6,21 @@ import java.util.Set;
  * The idea for this FileServer implementation is that the file mode can be
  * inferred by the status of it's associated locks.
  * 
- * As a result, there will be 2 HashMaps: 1. HashMap for the filename and file
- * content 2. HashMap for the filename and it's read and write locks.
+ * As a result, there will be 2 HashMaps:
+ * 1. HashMap for the filename and file content
+ * 2. HashMap for the filename and it's read and write locks.
  * 
+ * The Read and Write lock is implemented in ReadWriteSemLock.java, read the docstring there
+ * In terms of fairness, the processes get allocated read or write locks
+ * in the order they were added to the queue. (LIFO).
+ * To avoid race conditions, essentially I allow up to 10 concurrent read accesses (whilst blocking write access)
+ * and I allow max 1 concurrent write access (while blocking read access)
+ * Utilising the ReadWriteSemLock I implemented
  * 
+ * These numbers above are per unique file. EG if someone wanted to concurrently write
+ * to 3 different files, that's fine, since the lock is per file.
+ * 
+ * Starvation is avoided by always releasing locks once the file has been 
  * 
  * @author jamesjarvis
  */
