@@ -52,14 +52,14 @@ public class ReadWriteSemLock {
     } catch (InterruptedException e) {
       System.out.println(e);
     }
-    System.out.println(Thread.currentThread().getName() + " acquired write lock, read: "+this.readSem.availablePermits() + ", write: "+this.writeSem.availablePermits());
+    // System.out.println(Thread.currentThread().getName() + " acquired write lock, read: "+this.readSem.availablePermits() + ", write: "+this.writeSem.availablePermits());
   }
 
   public void releaseWriteLock() {
     this.mode = Mode.CLOSED;
     this.writeSem.release();
     this.readSem.release(this.MAXREADS);
-    System.out.println(Thread.currentThread().getName() + " released write lock, read: "+this.readSem.availablePermits() + ", write: "+this.writeSem.availablePermits());
+    // System.out.println(Thread.currentThread().getName() + " released write lock, read: "+this.readSem.availablePermits() + ", write: "+this.writeSem.availablePermits());
   }
 
   public Mode getMode() {

@@ -43,7 +43,7 @@ public class MyFileServer implements FileServer {
         break;
       case READWRITEABLE:
         this.locks.get(filename).acquireWriteLock();
-        System.out.println(Thread.currentThread().getName() + " acquired write lock on " + filename);
+        // System.out.println(Thread.currentThread().getName() + " acquired write lock on " + filename);
         break;
       default:
         return Optional.empty();
@@ -58,7 +58,7 @@ public class MyFileServer implements FileServer {
 
   @Override
   public void close(File file) {
-    System.out.println(Thread.currentThread().getName() + "Recieved close request: " + file.filename() + file.mode() + file.read()); 
+    // System.out.println(Thread.currentThread().getName() + " Recieved close request: " + file.filename() + file.mode() + file.read()); 
     Mode actualMode = this.locks.get(file.filename()).getMode();
     try {
       switch (actualMode) {
@@ -72,7 +72,7 @@ public class MyFileServer implements FileServer {
         if (file.mode() == Mode.READWRITEABLE) {
           this.files.put(file.filename(), file.read());
           this.locks.get(file.filename()).releaseWriteLock();
-          System.out.println(Thread.currentThread().getName() + " released write lock on " + file.filename()+", wrote "+file.read());
+          // System.out.println(Thread.currentThread().getName() + " released write lock on " + file.filename()+", wrote "+file.read());
         }
         break;
       default:
