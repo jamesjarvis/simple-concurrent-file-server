@@ -14,6 +14,6 @@ But the tests are not exhaustive, so bear that in mind.
 If you want to test the Example `Client` included, then run the following:
 
 1. Move into `src` if not already there with `cd src/`
-2. Compile MyFileServer with `java MyFileServer.java`
+2. Compile MyFileServer with `javac MyFileServer.java`
 3. Compile Client with `javac Client.java`
 4. Run with `java Client`

@@ -3,10 +3,10 @@ import java.util.concurrent.Semaphore;
 /**
  * ReadWriteSemLock is the locking implementation for the file system
  * 
- * It allows for a maximum of 10 concurrent read requests, and only 1 write
+ * It allows for a specified maximum concurrent read requests, and only 1 write
  * request.
  * 
- * This is due to the fact that there is a max buffer of 10 for the read semaphore.
+ * This is due to the fact that there is a specified max buffer for the read semaphore.
  * Also, if the read is starting from a closed state, it also obtains the write lock
  * to prevent any writes while being read.
  * 
@@ -21,7 +21,7 @@ public class ReadWriteSemLock {
   private Mode mode;
 
   public ReadWriteSemLock() {
-    this.MAXREADS = 10;
+    this.MAXREADS = Integer.MAX_VALUE;
     this.readSem = new Semaphore(MAXREADS);
     this.writeSem = new Semaphore(1);
     this.mode = Mode.CLOSED;
