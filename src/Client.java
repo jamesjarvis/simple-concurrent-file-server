@@ -2,7 +2,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.Optional;
 
 /**
- * Client implemented to show that the client-server interactions work as intended.
+ * Client implemented to show that the client-server interactions work as
+ * intended.
  */
 public class Client implements Runnable {
 
@@ -18,24 +19,29 @@ public class Client implements Runnable {
       String filename = ThreadLocalRandom.current().nextInt(1, 5) + ".txt";
       boolean isWrite = ThreadLocalRandom.current().nextBoolean();
       Mode mode = isWrite ? Mode.READWRITEABLE : Mode.READABLE;
-      printinfo("ATTEMPT OPEN -", filename, mode, "");
-      Optional<File> of = fs.open(filename, Mode.READWRITEABLE);
+      printinfo("ATTEMPT OPEN -", filename, mode, "", i);
+      // Open file
+      Optional<File> of = fs.open(filename, mode);
       File f = of.get();
-      printinfo("OPENED -------", filename, mode, "");
+      printinfo("OPENED -------", filename, mode, "", i);
+      // Read from file
       String temp = f.read();
-      printinfo("READ ---------", filename, mode, temp);
+      printinfo("READ ---------", filename, mode, temp, i);
       if (isWrite) {
         String tempWrite = temp + temp.substring(0, 1);
+        // Write to file
         f.write(tempWrite);
-        printinfo("WROTE --------", filename, mode, tempWrite);
+        printinfo("WROTE --------", filename, mode, tempWrite, i);
       }
+      // Close file
       fs.close(f);
-      printinfo("CLOSED -------", filename, mode, "");
+      printinfo("CLOSED -------", filename, mode, "", i);
     }
   }
 
-  public void printinfo(String info, String filename, Mode mode, String content) {
-    System.out.println(Thread.currentThread().getName() +" "+ mode+ " " + info + " from "+ filename +" : "+ content);
+  public void printinfo(String info, String filename, Mode mode, String content, int i) {
+    System.out.println(
+        Thread.currentThread().getName() + "-" + i + " " + mode + " " + info + " from " + filename + " : " + content);
   }
 
   public static void main(String[] args) {
@@ -48,7 +54,8 @@ public class Client implements Runnable {
     fs.create("4.txt", "D");
     fs.create("5.txt", "E");
 
-    // Set up 10 threads to do their 10 random operations ... 100 operations in total
+    // Set up 10 threads to do their 10 random operations ... 100 operations in
+    // total
     for (int i = 0; i < 10; i++) {
       Thread client = new Thread(new Client(fs));
       client.start();
