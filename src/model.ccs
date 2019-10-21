@@ -2,22 +2,14 @@
 S = acq.rel.S;
 S2 = S | S;
 S3 = S2 | S;
+* ReadWriteSem is the custom semaphore written for read and write lock management, and it essentially the server
 ReadWriteSem = S[writeAcq/acq, writeRelease/rel] | S3[readAcq/acq, readRelease/rel];
 
-* Server
-Server = OpenRead \ {fileName} | OpenWrite \ {fileName} | CloseRead \ {fileName} | CloseWrite \ {fileName} | start.Server;
-OpenRead = 'read.'fileName.AcquireReadLock \ {fileName};* Then output file obv
-OpenWrite = 'write.'fileName.AcquireWriteLock \ {fileName};
-AcquireReadLock = 'writeAcq.'readAcq.file.0 + 'readAcq.file.0; * I have put the "file" output here, as it cannot be put after the AcquireReadLock calling in OpenRead. It works essentially the same though.
-AcquireWriteLock = 'readAcq.'readAcq.'readAcq.'writeAcq.file.0;
-ReleaseReadLock = 'readRelease.'writeRelease.0 + 'readRelease.0;
-ReleaseWriteLock = 'writeRelease.'readRelease.'readRelease.'readRelease.0;
-CloseRead = 'closeRead.'file.ReleaseReadLock;
-CloseWrite = 'closeWrite.'file.ReleaseWriteLock;
-
 * Client
-Client = (ClientOpenRead | ClientCloseRead) + (ClientOpenWrite | ClientCloseWrite);
-ClientOpenRead = read.fileName.'file.0;
-ClientOpenWrite = write.fileName.'file.0;
-ClientCloseRead = closeRead.file.Client;
-ClientCloseWrite = closeWrite.file.Client;
+Client = ClientRead + ClientWrite;
+ClientRead = 'writeAcq.'readAcq.ClientCloseRead + 'readAcq.ClientCloseRead;
+ClientCloseRead = 'readRelease.'writeRelease.Client + 'readRelease.Client;
+ClientWrite = 'readAcq.'readAcq.'readAcq.'writeAcq.ClientCloseWrite;
+ClientCloseWrite = 'writeRelease.'readRelease.'readRelease.'readRelease.Client;
+
+App = (Client | Client | Client | ReadWriteSem) \ {readAcq, writeAcq, readRelease, writeRelease};
