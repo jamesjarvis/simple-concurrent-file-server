@@ -1,15 +1,22 @@
-* Semaphores
+* Semaphores (we have a semaphore with 1 lock for writing, and one with 3 locks for reading, but this can be any natural number).
 S = acq.rel.S;
 S2 = S | S;
 S3 = S2 | S;
-* ReadWriteSem is the custom semaphore written for read and write lock management, and it essentially the server
+* ReadWriteSem is the custom semaphore written for read and write lock management, and it essentially the server.
+* I previously had an implementation with further handshakes for calling the functions (transferring filename and file etc)
+* But the transitions provided no additional functionality, and it is simpler to understand without.
 ReadWriteSem = S[writeAcq/acq, writeRelease/rel] | S3[readAcq/acq, readRelease/rel];
 
-* Client
+* Client can either 
 Client = ClientRead + ClientWrite;
+* ClientRead has to obtain the write lock if it is available, and then one read lock.
 ClientRead = 'writeAcq.'readAcq.ClientCloseRead + 'readAcq.ClientCloseRead;
+* ClientCloseRead releases one read lock, and the write lock if obtained.
 ClientCloseRead = 'readRelease.'writeRelease.Client + 'readRelease.Client;
+* ClientWrite obtains all read locks to prevent simulatenous reads, and obtains the write lock.
 ClientWrite = 'readAcq.'readAcq.'readAcq.'writeAcq.ClientCloseWrite;
+* ClientCloseWrite releases all locks, to enable further reads and writes.
 ClientCloseWrite = 'writeRelease.'readRelease.'readRelease.'readRelease.Client;
 
+* We spawn 3 clients and 1 server (called ReadWriteSem), but in actual use we can spawn any number of clients.
 App = (Client | Client | Client | ReadWriteSem) \ {readAcq, writeAcq, readRelease, writeRelease};
